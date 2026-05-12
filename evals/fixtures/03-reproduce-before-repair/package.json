@@ -1,0 +1,9 @@
+{
+  "name": "fixture-03-reproduce-before-repair",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test test/*.spec.ts"
+  }
+}

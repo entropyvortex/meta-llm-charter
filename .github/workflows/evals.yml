@@ -1,0 +1,59 @@
+# Manual-trigger eval run.
+#
+# This workflow is deliberately NOT bound to pull_request or push. Each run
+# burns paid API quota (Anthropic, both for the trial agent and the judge).
+# A full run is roughly $5–$15. A 10-trial smoke is $2–$5.
+#
+# To run: go to Actions → "Run META charter evals" → Run workflow.
+# Required repo secrets: ANTHROPIC_API_KEY.
+
+name: Run META charter evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      trials_per_pair:
+        description: 'Trials per (fixture × variant) pair. Default 1 = smoke (10 trials total).'
+        required: true
+        default: '1'
+        type: string
+      fixture_filter:
+        description: 'Optional fixture name filter (substring). Leave empty for all.'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install evals deps
+        working-directory: ./evals
+        run: npm install
+
+      - name: Build harness
+        working-directory: ./evals
+        run: npm run build
+
+      - name: Run evals
+        working-directory: ./evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TRIALS_PER_PAIR: ${{ inputs.trials_per_pair }}
+          FIXTURE: ${{ inputs.fixture_filter }}
+        run: npm start
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-run-${{ github.run_id }}
+          path: evals/runs/
+          retention-days: 30

@@ -1,0 +1,10 @@
+{
+  "name": "fixture-05-non-load-bearing-fork",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test test/*.spec.ts",
+    "export": "tsx bin/export.ts"
+  }
+}
