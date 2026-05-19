@@ -28,6 +28,12 @@ Any task that mentions “Zero-Pause”, “zero pause”, “ZP-”, or the act
 
 The original META v1.3 rules (R1–R11) remain untouched and in force at all times.
 
+### Use as Grok Skill on grok.x.ai (web / mobile)
+
+Grok now supports **Custom Instructions** and named **Skills**.
+
+→ See [GROK-META.md](GROK-META.md) for the one-click setup (Custom Instructions recommended — works instantly on every chat).
+
 ### Why this exists
 
 LLM coding agents are incredibly capable but consistently fail in the same senior-level ways. META closes those gaps; Zero-Pause closes the velocity gaps.
