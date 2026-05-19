@@ -23,6 +23,11 @@ on:
         default: ''
         type: string
 
+permissions:
+  contents: read
+  actions: read
+  id-token: none
+
 jobs:
   evals:
     runs-on: ubuntu-latest
