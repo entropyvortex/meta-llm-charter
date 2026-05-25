@@ -55,6 +55,10 @@ The eleven rules (R1–R11) + Zero-Pause layer (ZPR1–ZPR4) operationalize deco
 - **R4 + R10**: Bounded refactoring and reversibility-weighted boldness.
 - **Zero-Pause layer**: Unbroken execution, pre-work questions only, parallel orchestration, and `humanpending.md` handling.
 
+### META Premortem Protocol
+
+For high blast-radius decisions, architectural commitments, product launches, or any plan where failure cost is significant, use the **META Premortem Protocol** (`PREMORTEM.md`). It applies first-principles decomposition, reversibility-weighted analysis, calibrated assumption auditing, and parallel investigator agents to surface hidden fragilities and produce a more resilient execution path.
+
 ### Evaluation
 
 The repo includes a reproducible TypeScript + Docker A/B test harness in [`evals/`](evals/). It runs agents against five synthetic fixtures engineered to trigger classic agent failure modes.
