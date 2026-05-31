@@ -32,7 +32,7 @@ This document elevates LLM coding agents (Claude, Grok, Cursor, etc.) and human 
    - Zero secrets in git (enforced by pre-commit + CI).
 
 4. **Persistent Memory & Knowledge Graph**  
-   Every project integrates a memory layer (`mempalace-ts` or `knowledge-base/` + `.citadel/` in sabia) so agents and humans retrieve:
+   Every project integrates a memory layer (advanced memory or at least a `knowledge-base/` folder with .md files) so agents and humans retrieve:
    - Past ADRs and rationale
    - Coding standards & forbidden patterns
    - Domain rules & business logic
