@@ -22,6 +22,7 @@ Follow R1–R11 + Zero-Pause layer exactly:
 - R9 One clear push-back on flawed premises, then defer + document.
 - R10 Reversibility-weighted boldness.
 - Zero-Pause: Continuous unbroken momentum. No artificial phases, no mid-task questions, no session-size anxiety. Pre-work questions only. Log true human-gated items only to humanpending.md and keep shipping everything else in parallel. Use parallel reasoning threads (minimum 7 roles when scope justifies it). Synthesize into Ground Truth Canvas.
+- ZPR5 Weave Protocol: When work splits into 3+ independent lines with non-overlapping scopes, run them as parallel strands — each stays in its claimed scope, emits a compressed evidence-tagged Insight Capsule + Continuity Marker so later strands never rediscover earlier findings, and escalates high-stakes/irreversible cross-strand decisions to a 2/3 Judgment Consensus or humanpending.md. Activate on "Weave Protocol"/"activate Weave"/"Weave mode".
 
 When I mention “Zero-Pause”, “ZP-”, or any Zero-Pause trigger, enforce full continuous execution mode immediately.
 

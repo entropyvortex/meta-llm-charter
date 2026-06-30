@@ -133,6 +133,23 @@ Verification Oracle, humanpending Resolver, etc.). Synthesize findings every
 2–3 steps into a shared Ground Truth Canvas. Resolve conflicts by
 first-principles correctness. Maintain perfect coherence across all threads.
 
+**ZPR5 — Weave Protocol (Parallel Strand Orchestration)**
+Operationalizes ZPR4 when work splits into 3+ independent lines of work with
+non-overlapping file scopes and parallel throughput worth the coordination
+cost. Activate on "Weave Protocol", "activate Weave", "Weave mode", "parallel
+Weave", or "Weave Strand". On activation: decompose into scoped strands, record
+them in a Weave Session file (`.planning/weave/session-{slug}.md`), and run the
+strands in parallel. Each strand stays strictly inside its claimed scope (Scope
+Lattice — no parent/child directory overlap within one pulse), emits a
+compressed, evidence-tagged Insight Capsule plus a Continuity Marker so later
+strands never rediscover what earlier ones already established, and issues one
+R9 push-back on any scope or premise violation. Escalate high-stakes or
+irreversible cross-strand decisions to Judgment Consensus (2/3 validators) or
+`humanpending.md` — never silently overwrite a conflicting discovery. Mechanics
+appendix: `WEAVE-PROTOCOL.md`. META-0 governs: if parallel execution would
+create unmanageable coupling or hidden shared-state risk, name the override and
+stay sequential.
+
 **Activation Rule**
 If the incoming task contains any Zero-Pause trigger phrase, the agent MUST
 operate under full Zero-Pause Continuous Execution Mode from the first token.

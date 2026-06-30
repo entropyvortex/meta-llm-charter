@@ -1,7 +1,7 @@
 {
   "name": "meta-charter-evals",
   "version": "1.0.0",
-  "description": "A/B evals for META v1.3 charter vs no-charter baseline (Docker sandboxed)",
+  "description": "A/B evals for the META v2.0 charter vs no-charter baseline (Docker sandboxed), plus an additive Weave Protocol (ZPR5) eval suite",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,9 @@
     "start": "node dist/index.js",
     "dev": "node --loader ts-node/esm src/index.ts",
     "smoke": "TRIALS_PER_PAIR=1 node dist/index.js",
-    "single": "TRIALS_PER_PAIR=1 node dist/index.js"
+    "single": "TRIALS_PER_PAIR=1 node dist/index.js",
+    "weave:eval": "node --loader ts-node/esm src/weave-runner.ts",
+    "weave:smoke": "npm run weave:eval -- knowledge-propagation-auth-rate-limit weave && npm run weave:eval -- knowledge-propagation-auth-rate-limit baseline && npm run weave:eval -- judgment-consensus-partial-success weave && npm run weave:eval -- judgment-consensus-partial-success baseline"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",

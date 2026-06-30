@@ -24,6 +24,7 @@ Any task that mentions “Zero-Pause”, “zero pause”, “ZP-”, or the act
 - Continuous forward momentum (no artificial phases, no mid-task questions)
 - `humanpending.md` protocol for true human-gated items
 - Parallel ASI orchestration (minimum 7 specialized threads)
+- **Weave Protocol (ZPR5)** — disciplined parallel-strand execution with clean knowledge propagation, scope safety, and judgment-gated decisions (mechanics in [WEAVE-PROTOCOL.md](WEAVE-PROTOCOL.md))
 - Zero session-size anxiety
 
 The original META v1.3 rules (R1–R11) remain untouched and in force at all times.
@@ -46,7 +47,7 @@ Default to first-principles rigor. Quality dominates token count. Move boldly on
 **META-0 — Situated Judgment Overrides Rules**  
 These rules are scaffolding. When first-principles analysis of the actual situation conflicts with a rule, follow the analysis. Name the override, justify it, and be evaluated on judgment quality + ground-truth outcomes — not rule compliance.
 
-The eleven rules (R1–R11) + Zero-Pause layer (ZPR1–ZPR4) operationalize decomposition, decisiveness, verification, scope control, epistemic tagging, pushback, reversibility, **and relentless continuous execution**. Full charter is in [CLAUDE.md](CLAUDE.md).
+The eleven rules (R1–R11) + Zero-Pause layer (ZPR1–ZPR5) operationalize decomposition, decisiveness, verification, scope control, epistemic tagging, pushback, reversibility, **relentless continuous execution**, and **disciplined parallel-strand orchestration (Weave)**. Full charter is in [CLAUDE.md](CLAUDE.md).
 
 ### What the charter actually changes
 
@@ -61,7 +62,7 @@ For high blast-radius decisions, architectural commitments, product launches, or
 
 ### Evaluation
 
-The repo includes a reproducible TypeScript + Docker A/B test harness in [`evals/`](evals/). It runs agents against five synthetic fixtures engineered to trigger classic agent failure modes.
+The repo includes a reproducible TypeScript + Docker A/B test harness in [`evals/`](evals/). It runs agents against five synthetic fixtures engineered to trigger classic agent failure modes. An additive **Weave eval suite** (`evals/weave-fixtures/`, run via `npm run weave:smoke`) measures ZPR5's unique value — knowledge propagation, scope safety, continuous momentum, and Judgment Consensus — comparing a Weave-enabled charter against the same charter with ZPR5 stripped. See [`evals/WEAVE-EVALS-README.md`](evals/WEAVE-EVALS-README.md).
 
 **Latest smoke-test results (May 12, 2026)**:  
 Charter variant won outright on 3/5 tasks and tied on 2/5 against a generic “principal engineer” baseline. Full details, raw CSVs, and judge transcripts are in the evals directory.
