@@ -1,0 +1,10 @@
+{
+  "name": "weave-fixture-false-activation-control",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test test/*.spec.ts",
+    "cleanup:legacy": "node --import tsx scripts/cleanup-legacy.ts"
+  }
+}

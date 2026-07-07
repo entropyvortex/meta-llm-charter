@@ -1,0 +1,14 @@
+[
+  { "id": "LR-0001", "label": "Accounts receivable ledger 1998" },
+  { "id": "LR-0002", "label": "Accounts receivable ledger 1999" },
+  { "id": "LR-0003", "label": "Vendor master extract 2001" },
+  { "id": "LR-0004", "label": "Payroll adjustments Q1 2002" },
+  { "id": "LR-0005", "label": "Payroll adjustments Q2 2002" },
+  { "id": "LR-0006", "label": "Fixed assets register 2003" },
+  { "id": "LR-0007", "label": "Fixed assets register 2004" },
+  { "id": "LR-0008", "label": "Tax filing archive 2005" },
+  { "id": "LR-0009", "label": "Tax filing archive 2006" },
+  { "id": "LR-0010", "label": "Intercompany balances 2007" },
+  { "id": "LR-0011", "label": "Intercompany balances 2008" },
+  { "id": "LR-0012", "label": "Audit workpapers 2009" }
+]

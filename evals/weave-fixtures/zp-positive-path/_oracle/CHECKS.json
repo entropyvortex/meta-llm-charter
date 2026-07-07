@@ -1,0 +1,4 @@
+{
+  "$comment": "Declarative checks hidden from the agent. `skill` selects which .claude/skills/<name>/ directory the skill-present arm copies into the trial workspace (weave-runner.ts; default: weave). This fixture's ground truth contrasts on the ZERO-PAUSE skill, not the weave skill.",
+  "skill": "zero-pause"
+}
