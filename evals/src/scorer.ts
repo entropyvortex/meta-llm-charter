@@ -106,6 +106,11 @@ interface ScorePayload {
 }
 
 export async function scoreTrial(result: TrialResult, charter: string): Promise<TrialResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    result.notes = 'JUDGE_SKIPPED: no ANTHROPIC_API_KEY (experimental subscription mode for agent only)';
+    return result;
+  }
+
   // Variant is intentionally NOT included in the judge's input.
   const trialMaterials = `
 <task-name>${result.taskName}</task-name>

@@ -15,7 +15,7 @@ export interface SandboxRunConfig {
   workspaceMount: string;
   /** Read-only mount holding system prompts and task files. */
   promptMount: string;
-  /** ANTHROPIC_API_KEY must be passed in for the claude CLI to authenticate. */
+  /** ANTHROPIC_API_KEY for the claude CLI inside the sandbox. */
   apiKey: string;
   timeoutMs?: number;
 }
@@ -33,20 +33,22 @@ export async function runTrialInSandbox(config: SandboxRunConfig): Promise<Sandb
   // Clean up any old container with same name
   await execa('docker', ['rm', '-f', containerName], { reject: false }).catch(() => {});
 
-  const result = await execa('docker', [
+  const dockerArgs: string[] = [
     'run', '--rm',
     '--name', containerName,
     '--cap-drop=ALL',
     '--security-opt=no-new-privileges',
     '--tmpfs=/tmp',
-    // '--tmpfs=/home/node',     // ←←← COMMENT THIS OUT (this is the blocker)
     '-v', `${workspaceMount}:/workspace:rw`,
     '-v', `${promptMount}:/prompts:ro`,
     '--env-file', '.env',
+    '-e', `ANTHROPIC_API_KEY=${apiKey}`,
     '--user', '1000:1000',
     IMAGE_NAME,
     'sh', '-c', command,
-  ], { timeout: timeoutMs, reject: false });
+  ];
+
+  const result = await execa('docker', dockerArgs, { timeout: timeoutMs, reject: false });
 
   return {
     transcript: `${result.stdout}\n--- STDERR ---\n${result.stderr}`,

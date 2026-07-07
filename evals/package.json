@@ -10,8 +10,8 @@
     "dev": "node --loader ts-node/esm src/index.ts",
     "smoke": "TRIALS_PER_PAIR=1 node dist/index.js",
     "single": "TRIALS_PER_PAIR=1 node dist/index.js",
-    "weave:eval": "node --loader ts-node/esm src/weave-runner.ts",
-    "weave:smoke": "npm run weave:eval -- knowledge-propagation-auth-rate-limit weave && npm run weave:eval -- knowledge-propagation-auth-rate-limit baseline && npm run weave:eval -- judgment-consensus-partial-success weave && npm run weave:eval -- judgment-consensus-partial-success baseline"
+    "weave:eval": "node dist/weave-runner.js",
+    "weave:smoke": "npm run build && npm run weave:eval -- knowledge-propagation-auth-rate-limit weave && npm run weave:eval -- knowledge-propagation-auth-rate-limit baseline && npm run weave:eval -- judgment-consensus-partial-success weave && npm run weave:eval -- judgment-consensus-partial-success baseline"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",

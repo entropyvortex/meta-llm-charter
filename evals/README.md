@@ -75,7 +75,7 @@ just runs the `.ts` files directly: `node --import tsx --test test/*.spec.ts`.
 
 - Docker installed and running
 - Node 20+
-- `ANTHROPIC_API_KEY` (paid quota — both the trial agent and the judge call the API)
+- `ANTHROPIC_API_KEY` (paid quota — both the trial agent inside the Docker sandbox and the LLM judges call the API)
 
 ### Setup
 

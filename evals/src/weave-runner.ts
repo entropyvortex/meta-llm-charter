@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { execa } from 'execa';
 import { TrialResult, Variant } from './types.js';
 import { buildSandboxImage, runTrialInSandbox } from './docker.js';
@@ -163,6 +162,19 @@ export async function runWeaveEval(
     throw new Error('ANTHROPIC_API_KEY is required (export it or put it in evals/.env)');
   }
 
+  // Early, clear check so users don't get a cryptic ENOENT or daemon error later.
+  // Note: `--version` only checks for the client binary. Actual `build`/`run`
+  // will still fail (with a clearer message) if the daemon is unreachable.
+  try {
+    await execa('docker', ['--version'], { stdio: 'ignore' });
+  } catch {
+    throw new Error(
+      'Docker is not available (or the daemon is not running).\n' +
+      'The eval harness runs the agent inside a hardened `docker` sandbox.\n' +
+      'Install/start Docker, then retry.'
+    );
+  }
+
   const fixtureDir = path.join(WEAVE_FIXTURES_DIR, fixtureName);
   const taskPath = path.join(fixtureDir, 'TASK.md');
   const taskPrompt = await fs.readFile(taskPath, 'utf-8'); // throws clearly if fixture missing
@@ -294,14 +306,15 @@ async function main(): Promise<void> {
   await runWeaveEval(fixtureArg, mode);
 }
 
-// Run as a script (mirrors index.ts), but stay importable for tests/embedding.
-// Compare resolved filesystem paths so it works under ts-node (.ts) and node
-// dist (.js), with relative or absolute argv[1].
-const thisFile = fileURLToPath(import.meta.url);
-const entry = process.argv[1] ? path.resolve(process.argv[1]) : '';
-if (entry && entry === thisFile) {
-  main().catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
-}
+// Always execute when this file is the entrypoint (ts-node or built JS).
+// Matches the pattern used in src/index.ts. The conditional guard was too
+// fragile under `node --loader ts-node/esm`.
+main().catch((err) => {
+  if (err instanceof Error) {
+    console.error(err.message);
+    if (err.stack) console.error(err.stack);
+  } else {
+    console.error('weave-runner error:', err);
+  }
+  process.exit(1);
+});

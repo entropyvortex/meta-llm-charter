@@ -156,6 +156,11 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error(err);
+  if (err instanceof Error) {
+    console.error(err.message);
+    if (err.stack) console.error(err.stack);
+  } else {
+    console.error('evals error:', err);
+  }
   process.exit(1);
 });

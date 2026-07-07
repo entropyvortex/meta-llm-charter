@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { WeaveSpecificMetrics } from './weave-types.js';
+import { WeaveSpecificMetrics, emptyWeaveMetrics } from './weave-types.js';
 
 const client = new Anthropic();
 const JUDGE_MODEL = process.env.JUDGE_MODEL ?? 'claude-sonnet-4-6';
@@ -137,6 +137,12 @@ export interface WeaveScoreOutput {
  * callers can filter these out, matching scorer.ts's failure semantics.
  */
 export async function scoreWeaveTrial(input: WeaveScoreInput): Promise<WeaveScoreOutput> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return {
+      metrics: emptyWeaveMetrics(),
+      rationale: 'JUDGE_SKIPPED: no ANTHROPIC_API_KEY (experimental subscription mode — agent ran with CLAUDE_CREDENTIALS_DIR only)',
+    };
+  }
   const materials = `
 <fixture-name>${input.fixture}</fixture-name>
 

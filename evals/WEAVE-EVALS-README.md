@@ -33,7 +33,8 @@ Same as the base harness — this is real, sandboxed, paid execution:
 
 ```bash
 cd evals
-npm install        # first time only
+npm install
+npm run build
 # weave arm:
 npm run weave:eval -- knowledge-propagation-auth-rate-limit weave
 # baseline arm (ZPR5 stripped):
