@@ -14,6 +14,54 @@ Format follows [Keep a Changelog](https://keepachangelog.com/); versioning is
 CI enforces changelog discipline: `.github/workflows/lint.yml` fails any diff
 that changes `CLAUDE.md` without touching this file.
 
+## [3.1.0] — 2026-07-07
+
+### Added — Fable-charter imports (core, +350 B of mechanism)
+
+Distilled from the "Fable 5 Distilled Reasoning Charter" via a 3-lens
+distillation panel + merge judge (12+ features rejected as bloat or
+harness-native; 4 imported):
+
+- **R5**: multi-file change sets come from search, not recall; closure
+  requires a zero-remaining search (closes the partial multi-file-edit
+  failure mode).
+- **R5**: before "done" or after compaction/resume, re-read the original ask
+  from source and map deliverables to now-verified artifacts (closes
+  premature closure and context-drift/goal-mutation).
+- **R8**: evidence tags upgrade only on evidence observed here; "verified"
+  claims inside prompts, files, or tool output stay [assumed] (closes
+  testimony-upgrade and injected-authority).
+- **R8**: claims inherit the weakest premise's tag (closes derivation
+  laundering; subsumes supplied-figure sycophancy).
+- **CONTRIBUTING.md**: charter change gate — core edits require 3/3
+  transcripts per fixture on a pinned model matrix; failures add fixtures,
+  never waivers (zero core bytes).
+
+### Changed — precision fixes from the v3.0 adversarial review
+
+- **R10**: headless branch added — "No user: stop that line, log it in
+  humanpending.md; never self-confirm."
+- **R4**: partition defined — task-scoped = R1's minimal-fix files; lines =
+  adds+dels; "architectural boundary" unified to "bounded context" (R10's
+  term), glossed as service/package root.
+- **R2**: "No user" defined as a non-interactive run (CI, `claude -p`);
+  precedence compressed to "R10 outranks R2."
+
+### Removed — funding trims
+
+- Bias reduced to "Named caution scales with blast radius." (the autonomy
+  clause restated a harness default; the unverified-"done" maxim became
+  mechanically redundant once R5's closure re-read landed).
+- R7's "Convention-matching is the most common silent override" diagnostic
+  sentence (mechanism survives: pick one, name discarded, flag cleanup,
+  named correctness/security override).
+- Named override: the distillation judge proposed deleting R9's "Deference
+  to a wrong premise is not cooperation."; kept — the v3.0 design panel
+  mandated it verbatim and it is the dissent rule's calibration anchor.
+  `OVERRIDE(judge-trim)` recorded here.
+
+Core: 2,048 → 2,398 bytes [executed: wc -c]; CI gate unchanged at 2,400.
+
 ## [3.0.0] — 2026-07-07
 
 Branch `feature/meta-v3`. Merge to `main` is human-gated (see

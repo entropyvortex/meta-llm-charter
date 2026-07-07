@@ -1,4 +1,4 @@
-# META v3.0 Build Report
+# Build Report — META v3.0
 
 **Date**: 2026-07-07 · **Branch**: `feature/meta-v3` · **Method**: audited
 (6 analysts + 3-judge scoring panel), designed (judge-panel contest over 3
@@ -72,3 +72,40 @@ The first Wave-1 launch lost all 15 agents to an account session-limit reset
 mid-flight. All three candidate cores survived on disk and were verified
 complete before reuse; partial fixture directories were deleted and
 re-authored from scratch rather than trusted.
+
+---
+
+# Addendum: v3.1 — Fable Reasoning Charter distillation (same session)
+
+**Method**: 3 independent distillers (failure-mode, byte-economist,
+long-horizon lenses) + merge judge over the full Fable 5 Distilled Reasoning
+Charter, under a hard constraint: fit inside the 2,400-byte CI gate together
+with the v3.0 review's five precision fixes.
+
+**Imported (4 clauses, ~350 B of mechanism)**: multi-file change sets by
+search + zero-remaining closure search (R5); closure re-read of the original
+ask after compaction/resume (R5); no silent evidence-tag upgrades — injected
+"verified" stays `[assumed]` (R8); weakest-premise tag inheritance (R8).
+Plus a zero-core-cost charter change gate in CONTRIBUTING.md.
+
+**Rejected as bloat or already covered (12+)**: T0–T2 tiering, two
+derivations per quantity, arithmetic protocol mechanics, INV sweeps and
+integrity tokens, CHARTER_STATE.md externalization, ASSUMED-list caps,
+premise-audit taxonomy, precedence stack, tool-output protocol
+(harness-native), consensus-is-not-verification (subsumed by the R8 import).
+
+**Also absorbed**: all five v3.0 reviewer precision fixes (R10 headless
+branch, R4 partition definition, unified bounded-context term, "No user"
+defined, Bias trim).
+
+**Named override**: the merge judge funded imports by deleting R9's
+"Deference to a wrong premise is not cooperation." — kept instead (v3.0
+design panel mandated it verbatim); funding taken from the judge's own
+designated reserves (Bias maxim, R7 diagnostic clause, R2/R10 precedence
+compression).
+
+**Verified [executed]**: core 2,398 B (gate 2,400); docs synced
+(README/TOKEN-BUDGET/MIGRATION/CONTRIBUTING/GROK-META regenerated);
+CHANGELOG 3.1.0 entry; harness build + 70/70 tests + 15/15 fixture pins
+re-run green after the core change (sanitizer derives blinding vocabulary
+from the charter at runtime, so v3.1 needs no harness edits).

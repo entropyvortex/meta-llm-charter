@@ -12,7 +12,7 @@ Every PR runs two workflows:
   fixture test suite, comparing pass/fail/cancelled counts against the pinned
   `evals/fixtures-expected.json`. Fixtures ship designed-failing tests at HEAD
   (they are eval traps), so the gate is count-exact matching, not exit 0.
-- **`lint.yml`** — the charter byte gate: the core `CLAUDE.md` targets 2,048
+- **`lint.yml`** — the charter byte gate: the core `CLAUDE.md` measures 2,398
   bytes and hard-fails CI above 2,400 bytes.
 
 ## Changing the core charter
@@ -26,6 +26,15 @@ byte budget is CI-enforced. Two structural constraints:
   sanitizer derives its redaction list from the charter file.
 - **Respect the hard floors.** R10's gates and the harness permission system
   are exempt from META-0 override. PRs that soften either will be rejected.
+
+**Charter change gate** (adopted v3.1, distilled from the Fable Reasoning
+Charter's versioning discipline): a core-charter edit lands only if every
+eval fixture passes 3/3 transcripts on the pinned model matrix — at minimum
+the frontier reference model and the weakest model the charter is deployed
+on. A case failing only on the weakest model blocks the edit. Failures add
+fixtures or failure-registry rows, never waivers. Until the first committed
+run exists (humanpending.md item 2), this gate is aspirational and PRs must
+say so honestly.
 
 PRs that add rules must clear a high bar: name a failure mode the current
 rules don't already cover, or sharpen an existing rule in a way that changes

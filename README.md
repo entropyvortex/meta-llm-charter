@@ -1,6 +1,6 @@
-# META v3.0 — LLM Agent Engineering Charter
+# META v3.1 — LLM Agent Engineering Charter
 
-**A 2,048-byte always-loaded core. Three explicit-invocation skills. Deterministic gates where prose used to be.**
+**A 2,398-byte always-loaded core. Three explicit-invocation skills. Deterministic gates where prose used to be.**
 
 A compact, operational constitution that turns frontier coding agents (Claude Code, Cursor, etc.) from eager-junior behavior into disciplined principal-engineer execution.
 
@@ -8,7 +8,7 @@ A compact, operational constitution that turns frontier coding agents (Claude Co
 
 | Piece | What it is | When it loads |
 | --- | --- | --- |
-| [`CLAUDE.md`](CLAUDE.md) | The core charter: one Bias, one meta-rule (META-0), nine rules. Exactly 2,048 bytes `[executed: wc -c]`, CI-gated against growth (`lint.yml`). | Every session — Claude Code reads it automatically. |
+| [`CLAUDE.md`](CLAUDE.md) | The core charter: one Bias, one meta-rule (META-0), nine rules. 2,398 bytes `[executed: wc -c]`, CI-gated at 2,400 (`lint.yml`). | Every session — Claude Code reads it automatically. |
 | `.claude/skills/zero-pause/` | `/zero-pause` — continuous-momentum execution: no artificial pauses, pre-work questions only, `humanpending.md` protocol for true human-gated items. | Only when you invoke it. |
 | `.claude/skills/weave/` | `/weave` — parallel-strand orchestration: scoped strands, insight capsules, judgment consensus on cross-strand conflicts. | Only when you invoke it. |
 | `.claude/skills/premortem/` | `/premortem` — pre-commitment failure analysis for high blast-radius plans. | Only when you invoke it. |
@@ -47,7 +47,7 @@ cp -r meta-llm-charter/.claude/skills your-project/.claude/skills
 - **Cursor**: paste the core into Cursor Rules (or `.cursor/rules`).
 - **Other agents**: use the core as a high-priority system prompt. Skills are Claude Code-native; elsewhere, paste the relevant `SKILL.md` into context only when you want that mode.
 
-Nothing auto-activates. If you never invoke a skill, you run the 2,048-byte core and nothing else.
+Nothing auto-activates. If you never invoke a skill, you run the 2,398-byte core and nothing else.
 
 ## Core philosophy
 

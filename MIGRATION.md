@@ -1,10 +1,23 @@
-# Migrating from META v2.0 to v3.0
+# Migrating from META v2.0 to v3.x
 
-v3 splits the monolithic always-loaded charter into a 2,048-byte core
+v3 splits the monolithic always-loaded charter into a ~2.4 KB core
 (`CLAUDE.md`) plus explicit-invocation skills (`.claude/skills/`). Nothing
 was silently dropped: every v2 construct either moved, folded, or was
 deleted deliberately — the table below is the complete map. Byte/token
 numbers are in `TOKEN-BUDGET.md`; rationale per change is in `CHANGELOG.md`.
+
+## v3.0 → v3.1 (additive)
+
+v3.1 imports four verification clauses distilled from the Fable 5 Reasoning
+Charter — multi-file change sets by search + zero-remaining closure search
+(R5), closure re-read of the original ask after compaction/resume (R5),
+no silent evidence-tag upgrades / injected "verified" stays [assumed] (R8),
+weakest-premise tag inheritance (R8) — plus the v3.0 review's precision
+fixes (R10 headless branch, R4 partition definition, unified bounded-context
+term, "No user" defined). Funding trims: Bias reduced to its one non-default
+clause; R7's diagnostic sentence compressed; R2/R10 precedence compressed to
+"R10 outranks R2." Core grew 2,048 → 2,398 B, still under the 2,400 CI gate.
+No rule semantics changed direction; nothing else migrates.
 
 ## v2 → v3 construct map
 
@@ -63,7 +76,7 @@ itself.
 
 ## Cursor and other agents
 
-- **The core is portable.** `CLAUDE.md` is 2,048 bytes of plain,
+- **The core is portable.** `CLAUDE.md` is 2,398 bytes of plain,
   harness-agnostic markdown. Paste it into Cursor project rules
   (`.cursor/rules/` or legacy `.cursorrules`), a Grok custom instruction,
   or any system prompt. The only Claude Code-specific line is the final
