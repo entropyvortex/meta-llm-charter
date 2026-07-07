@@ -12,7 +12,7 @@ Every PR runs two workflows:
   fixture test suite, comparing pass/fail/cancelled counts against the pinned
   `evals/fixtures-expected.json`. Fixtures ship designed-failing tests at HEAD
   (they are eval traps), so the gate is count-exact matching, not exit 0.
-- **`lint.yml`** — the charter byte gate: the core `CLAUDE.md` measures 2,398
+- **`lint.yml`** — the charter byte gate: the core `CLAUDE.md` measures 2,399
   bytes and hard-fails CI above 2,400 bytes.
 
 ## Changing the core charter

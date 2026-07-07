@@ -16,7 +16,7 @@ weakest-premise tag inheritance (R8) — plus the v3.0 review's precision
 fixes (R10 headless branch, R4 partition definition, unified bounded-context
 term, "No user" defined). Funding trims: Bias reduced to its one non-default
 clause; R7's diagnostic sentence compressed; R2/R10 precedence compressed to
-"R10 outranks R2." Core grew 2,048 → 2,398 B, still under the 2,400 CI gate.
+"R10 outranks R2." Core grew 2,048 → 2,399 B, still under the 2,400 CI gate.
 No rule semantics changed direction; nothing else migrates.
 
 ## v2 → v3 construct map
@@ -31,7 +31,7 @@ No rule semantics changed direction; nothing else migrates.
 | Trigger phrases ("Zero-Pause", "zero pause", "ZP-", "Follow the Zero-Pause META Principal Architect Skill", "activate Weave", …) | **Deleted — explicit invocation ONLY.** | See the security note below. There is no phrase you can put in a task prompt, file, or pasted text that activates anything. Users invoke skills by name (`/zero-pause`, `/weave`, `/premortem`) or by directly asking for them. |
 | `PREMORTEM.md` protocol | `/premortem` skill (`.claude/skills/premortem/SKILL.md`) | Invokable; no longer discovered by reading a companion file. |
 | R3 — Proportional Simplicity | **Folded/cut.** | Covered by model prior; its spirit survives in R1's minimal-fix estimate (files/lines). Rule numbers stay sparse deliberately — do not renumber. |
-| R11 — Match Conventions | **Folded into R7 Choose.** | Convention-matching is named there as the most common silent override; break it only for correctness or security, named. |
+| R11 — Match Conventions | **Folded into R7 Choose.** | R7 now carries the fold: break convention only for correctness or security, named (the v3.0 diagnostic sentence was trimmed in v3.1). |
 | R10 staging clause | **Deleted (deliberate).** | The OR-list gates production-data mutation directly; a generic charter cannot assume a staging environment exists. Reintroduce in project memory if you have staging. |
 
 ### Security note: why trigger phrases had to go
@@ -76,7 +76,7 @@ itself.
 
 ## Cursor and other agents
 
-- **The core is portable.** `CLAUDE.md` is 2,398 bytes of plain,
+- **The core is portable.** `CLAUDE.md` is 2,399 bytes of plain,
   harness-agnostic markdown. Paste it into Cursor project rules
   (`.cursor/rules/` or legacy `.cursorrules`), a Grok custom instruction,
   or any system prompt. The only Claude Code-specific line is the final

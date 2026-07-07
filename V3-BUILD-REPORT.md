@@ -104,7 +104,7 @@ design panel mandated it verbatim); funding taken from the judge's own
 designated reserves (Bias maxim, R7 diagnostic clause, R2/R10 precedence
 compression).
 
-**Verified [executed]**: core 2,398 B (gate 2,400); docs synced
+**Verified [executed]**: core 2,399 B (gate 2,400); docs synced
 (README/TOKEN-BUDGET/MIGRATION/CONTRIBUTING/GROK-META regenerated);
 CHANGELOG 3.1.0 entry; harness build + 70/70 tests + 15/15 fixture pins
 re-run green after the core change (sanitizer derives blinding vocabulary

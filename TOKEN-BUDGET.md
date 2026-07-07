@@ -6,7 +6,7 @@ on 2026-07-07 (`feature/meta-v3`). Re-run the commands to verify; do not
 update a number without re-running its command.
 
 Byte counts are a *proxy* for tokens — this prose averages ~4 bytes/token —
-so budgets carry slack: the v3.0 core targeted 2,048 B; v3.1 measures 2,398 B (~600 tokens) after
+so budgets carry slack: the v3.0 core targeted 2,048 B; v3.1 measures 2,399 B (~600 tokens) after
 the Fable-charter imports, and CI
 hard-fails only above 2,400 B (`.github/workflows/lint.yml`, check a).
 
@@ -17,12 +17,12 @@ hard-fails only above 2,400 B (`.github/workflows/lint.yml`, check a).
 | v2 core (`feature/weave-protocol`, ZPR1–5) | 8,131 | `git show 96913ef:CLAUDE.md \| wc -c` | [executed] |
 | v2 stale parent copy (byte-identical to `main`) | 6,966 | `git show main:CLAUDE.md \| wc -c` | [executed] |
 | **v2 nested double-load, total** | **15,097** | sum of the two rows above | [executed] |
-| **v3.1 core `CLAUDE.md`** | **2,398** | `wc -c CLAUDE.md` | [executed] |
+| **v3.1 core `CLAUDE.md`** | **2,399** | `wc -c CLAUDE.md` | [executed] |
 
-**Always-loaded reduction: 15,097 → 2,398 B = 84.1%** (vs the nested v2
+**Always-loaded reduction: 15,097 → 2,399 B = 84.1%** (vs the nested v2
 deployment this workspace actually ran; the double-load is what v3's
 single-source gate and MIGRATION.md's @-import pointer eliminate).
-Against a single-copy v2 install the reduction is 8,131 → 2,398 B = 70.5%.
+Against a single-copy v2 install the reduction is 8,131 → 2,399 B = 70.5%.
 
 In tokens at ~4 B/token: ~3,770 tokens/session → ~510 tokens/session.
 
@@ -42,7 +42,7 @@ explicit user invocation.
 Description bytes measured with:
 `awk '/^description:/{sub(/^description:[ ]*/,""); print length($0); exit}' <SKILL.md>`
 
-Worst case with one skill invoked (`/weave`): 2,398 + 11,464 = 13,862 B —
+Worst case with one skill invoked (`/weave`): 2,399 + 11,464 = 13,863 B —
 still below v2's every-session 15,097 B, and paid only in sessions that use
 it. v2 charged ~3,870 B of Zero-Pause/Weave text to every session
 regardless.

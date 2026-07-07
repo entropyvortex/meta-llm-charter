@@ -60,7 +60,7 @@ harness-native; 4 imported):
   mandated it verbatim and it is the dissent rule's calibration anchor.
   `OVERRIDE(judge-trim)` recorded here.
 
-Core: 2,048 → 2,398 bytes [executed: wc -c]; CI gate unchanged at 2,400.
+Core: 2,048 → 2,399 bytes [executed: wc -c]; CI gate unchanged at 2,400.
 
 ## [3.0.0] — 2026-07-07
 
