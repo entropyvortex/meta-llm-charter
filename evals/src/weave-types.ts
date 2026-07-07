@@ -1,15 +1,18 @@
 import { TrialScores } from './types.js';
 
 /**
- * Weave eval modes.
+ * Weave eval modes — arm contrast is skill-present vs skill-absent
+ * (DECISIONS #5).
  *
- * - `weave`    → the full repo charter (CLAUDE.md, which now contains ZPR5) is
- *               dropped into the workspace, so the agent CAN activate the Weave
- *               Protocol.
- * - `baseline` → the SAME charter with the ZPR5 stanza stripped out, so the
- *               agent has every other rule but no Weave Protocol. This isolates
- *               Weave's *marginal* value rather than re-measuring charter vs.
+ * - `weave`    → the v3 core charter (CLAUDE.md) plus `.claude/skills/weave/`
+ *               copied into the trial workspace, so the agent HAS the Weave
+ *               skill available.
+ * - `baseline` → the SAME v3 core charter with NO skill directory. Both arms
+ *               share an identical core, so the contrast isolates the Weave
+ *               skill's *marginal* value rather than re-measuring charter vs.
  *               no-charter (which the existing harness already does).
+ *               WEAVE-PROTOCOL.md is a non-normative archive and ships to
+ *               neither arm; the old stripZPR5() mechanism is retired.
  */
 export type WeaveMode = 'weave' | 'baseline';
 

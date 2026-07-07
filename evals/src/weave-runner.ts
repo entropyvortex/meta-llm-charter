@@ -2,11 +2,25 @@ import 'dotenv/config';
 import fs from 'fs/promises';
 import path from 'path';
 import { execa } from 'execa';
-import { TrialResult, Variant } from './types.js';
+import { RunManifest, TrialResult, Variant } from './types.js';
 import { buildSandboxImage, runTrialInSandbox } from './docker.js';
-import { scoreTrial } from './scorer.js';
+import {
+  captureGitDiff,
+  gitHeadSha,
+  resolveAgentModel,
+  resolveTrialTimeoutS,
+  sha256OfFile,
+  writeRunManifest,
+} from './runner.js';
+import { JUDGE_MODEL, scoreTrial } from './scorer.js';
+import {
+  DeterministicMetrics,
+  computeDeterministicMetrics,
+  loadFixtureScope,
+} from './deterministic.js';
 import { scoreWeaveTrial } from './weave-scorer.js';
 import { WeaveMode, WeaveTrialResult, emptyWeaveMetrics } from './weave-types.js';
+import { resolveFixtureSkill } from './fixture-skill.js';
 
 /**
  * Weave eval runner. Reuses the REAL harness primitives — buildSandboxImage,
@@ -14,21 +28,32 @@ import { WeaveMode, WeaveTrialResult, emptyWeaveMetrics } from './weave-types.js
  * judge (weave-scorer.ts). It is fully additive: it never imports or mutates
  * the base orchestrator (index.ts), so `npm run smoke` is unaffected.
  *
- * Design note (R11 override, documented in weave-fixtures/NOTES.md):
+ * Design note (R7 override, documented in weave-fixtures/NOTES.md):
  * WEAVE-EVALS-DESIGN.md assumed `import { runFixture } from
  * './existing-harness-utils'`. No such module exists. The real reusable surface
  * is the five exports above plus a per-trial flow that mirrors index.ts's
  * private main() loop, re-implemented here against the true API.
  *
- * The two arms compare the charter WITH Weave (mode 'weave' → full CLAUDE.md,
- * which contains ZPR5) against the SAME charter with ZPR5 stripped (mode
- * 'baseline'). This isolates Weave's marginal value; it is deliberately NOT the
- * base harness's charter-vs-no-charter contrast.
+ * ── Arm definition (DECISIONS.md #5) ────────────────────────────────────────
+ * Both arms receive the SAME core charter (CLAUDE.md). The 'weave'
+ * (skill-present) arm additionally gets `.claude/skills/<skill>/` (from the
+ * repo root) copied into the trial workspace; 'baseline' gets no skill dir.
+ * The skill under test defaults to "weave" and can be declared per fixture in
+ * `_oracle/CHECKS.json` → `"skill"` (fixture-skill.ts) — e.g. zp-positive-path
+ * declares "zero-pause". The selection is recorded in the run manifest
+ * (`weaveSkill`). WEAVE-PROTOCOL.md is a non-normative archive and ships to
+ * NEITHER arm. This isolates the skill's marginal value on top of the v3 core.
+ *
+ * The previous mechanism — stripZPR5(), which cut the ZPR5 stanza out of the
+ * v2 charter for the baseline arm — is RETIRED: v3 has no ZPR5 stanza in the
+ * core, so skill-present vs skill-absent is the arm contrast now.
  */
 
 const EVALS_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const PROJECT_ROOT = path.resolve(EVALS_DIR, '..');
 const CHARTER_PATH = path.join(PROJECT_ROOT, 'CLAUDE.md');
+/** Skill dirs live here; the skill-present arm hard-fails if the selected one is missing. */
+const SKILLS_DIR = path.join(PROJECT_ROOT, '.claude', 'skills');
 const WEAVE_FIXTURES_DIR = path.join(EVALS_DIR, 'weave-fixtures');
 const RESULTS_DIR = path.join(EVALS_DIR, 'results');
 const RUNS_DIR = path.join(EVALS_DIR, 'runs');
@@ -36,40 +61,38 @@ const RUNS_DIR = path.join(EVALS_DIR, 'runs');
 const IMAGE_NAME = 'meta-charter-agent:latest';
 
 /**
- * Remove the ZPR5 stanza from the charter for the 'baseline' arm. The stanza is
- * the bold-inline paragraph starting `**ZPR5 ` and running up to the next
- * bold-inline header (`**Activation Rule**`), matching the Zero-Pause layer's
- * structure. If ZPR5 is absent, returns the charter unchanged.
+ * Same contract as index.ts's resetWorkspace (plus oracle removal): snapshot,
+ * commit with inline git identity, return the initial commit SHA for the diff
+ * evidence channel. Fatal on failure — a diff-less trial is unjudgeable.
  */
-export function stripZPR5(charter: string): string {
-  const lines = charter.split('\n');
-  const start = lines.findIndex((l) => l.startsWith('**ZPR5 ') || l.startsWith('**ZPR5—'));
-  if (start === -1) return charter;
-  let end = start + 1;
-  while (end < lines.length && !lines[end].startsWith('**')) end++;
-  return [...lines.slice(0, start), ...lines.slice(end)].join('\n');
-}
-
-async function resetWorkspace(target: string, source: string): Promise<void> {
+async function resetWorkspace(target: string, source: string): Promise<string> {
   await fs.rm(target, { recursive: true, force: true });
   await fs.cp(source, target, { recursive: true });
   // Hide the judge-only ground truth from the agent.
   await fs.rm(path.join(target, '_oracle'), { recursive: true, force: true });
+  // DECISIONS #5: WEAVE-PROTOCOL.md ships to NEITHER arm (defensive — fixtures
+  // should not contain it, but a stray copy would contaminate the contrast).
+  await fs.rm(path.join(target, 'WEAVE-PROTOCOL.md'), { force: true });
   try {
     await execa('git', ['init'], { cwd: target });
     await execa('git', ['add', '.'], { cwd: target });
-    await execa('git', ['commit', '-m', 'initial fixture state'], { cwd: target });
+    await execa(
+      'git',
+      [
+        '-c', 'user.email=evals@meta-charter.invalid',
+        '-c', 'user.name=META Evals Harness',
+        '-c', 'commit.gpgsign=false',
+        'commit', '-m', 'initial fixture state',
+      ],
+      { cwd: target }
+    );
+    const { stdout } = await execa('git', ['rev-parse', 'HEAD'], { cwd: target });
+    return stdout.trim();
   } catch (e) {
-    console.warn('Failed to init isolated git repo for trial (non-fatal):', e);
-  }
-}
-
-async function captureGitDiff(workspaceDir: string): Promise<string> {
-  try {
-    const { stdout } = await execa('git', ['diff', 'HEAD'], { cwd: workspaceDir });
-    return stdout;
-  } catch {
-    return '';
+    throw new Error(
+      `Failed to initialize trial workspace git repo at ${target} — ` +
+        `aborting instead of producing diff-less (unjudgeable) trials: ${e}`
+    );
   }
 }
 
@@ -161,6 +184,10 @@ export async function runWeaveEval(
   if (!apiKey) {
     throw new Error('ANTHROPIC_API_KEY is required (export it or put it in evals/.env)');
   }
+  // Both throw on missing/invalid values — no silent defaults for run-defining knobs.
+  const agentModel = resolveAgentModel();
+  const trialTimeoutS = resolveTrialTimeoutS();
+  const judgeModel = JUDGE_MODEL;
 
   // Early, clear check so users don't get a cryptic ENOENT or daemon error later.
   // Note: `--version` only checks for the client binary. Actual `build`/`run`
@@ -187,8 +214,27 @@ export async function runWeaveEval(
     groundTruth = '(no ground truth file found for this fixture)';
   }
 
-  const fullCharter = await fs.readFile(CHARTER_PATH, 'utf-8');
-  const charterForArm = mode === 'weave' ? fullCharter : stripZPR5(fullCharter);
+  // DECISIONS #5: both arms get the same core charter; only the skill-present
+  // arm gets a skill dir. Which skill is per-fixture (fixture-skill.ts):
+  // _oracle/CHECKS.json may declare "skill" (default "weave") — e.g.
+  // zp-positive-path declares "zero-pause" because its oracle contrasts on the
+  // zero-pause skill. Fail fast (before the docker build) if it is missing.
+  const coreCharter = await fs.readFile(CHARTER_PATH, 'utf-8');
+  const skillName = await resolveFixtureSkill(fixtureDir);
+  const skillDir = path.join(SKILLS_DIR, skillName);
+  if (mode === 'weave') {
+    try {
+      await fs.access(skillDir);
+    } catch {
+      throw new Error(
+        `Skill directory not found: ${skillDir}\n` +
+          `DECISIONS #5 defines the skill-present arm as core CLAUDE.md + .claude/skills/${skillName}/\n` +
+          `copied into the trial workspace (fixture ${fixtureName} selects "${skillName}" via\n` +
+          '_oracle/CHECKS.json; default is "weave"). Author the skill dir first — the baseline\n' +
+          'arm runs without it.'
+      );
+    }
+  }
 
   if (!opts.skipBuild) await buildSandboxImage(EVALS_DIR);
 
@@ -199,10 +245,35 @@ export async function runWeaveEval(
   await fs.mkdir(promptDir, { recursive: true });
 
   const trialId = `weave-${fixtureName}-${mode}`;
-  await resetWorkspace(workspaceDir, fixtureDir);
+  const initialCommit = await resetWorkspace(workspaceDir, fixtureDir);
 
-  // Drop the arm's charter into the workspace; Claude Code reads CLAUDE.md natively.
-  await fs.writeFile(path.join(workspaceDir, 'CLAUDE.md'), charterForArm, 'utf-8');
+  const manifest: RunManifest = {
+    runId,
+    timestamp: new Date().toISOString(),
+    agentModel,
+    judgeModel,
+    trialsPerPair: 1, // weave-runner executes exactly one (fixture, mode) trial per run
+    trialTimeoutS,
+    fixtures: [fixtureName],
+    charterSha256: await sha256OfFile(CHARTER_PATH),
+    harnessGitSha: await gitHeadSha(PROJECT_ROOT),
+    weaveMode: mode,
+    // Skill-present arm only: which .claude/skills/<name>/ dir shipped, so
+    // downstream tooling (publish-run blinding) can find the skill text.
+    ...(mode === 'weave' ? { weaveSkill: skillName } : {}),
+  };
+  await writeRunManifest(runDir, manifest);
+
+  // Both arms: the same core charter. Claude Code reads CLAUDE.md natively.
+  await fs.writeFile(path.join(workspaceDir, 'CLAUDE.md'), coreCharter, 'utf-8');
+  // Skill-present arm only: the fixture-selected skill dir. (.claude/ is
+  // pathspec-excluded from the judge's diff in runner.ts captureGitDiff, so
+  // this never unblinds.)
+  if (mode === 'weave') {
+    await fs.cp(skillDir, path.join(workspaceDir, '.claude', 'skills', skillName), {
+      recursive: true,
+    });
+  }
 
   const taskPromptFile = path.join(promptDir, `${trialId}.task.txt`);
   await fs.writeFile(taskPromptFile, taskPrompt, 'utf-8');
@@ -212,7 +283,7 @@ export async function runWeaveEval(
   cat /prompts/${trialId}.task.txt && \
   echo "=== PROMPT END ===" && \
   echo "=== CLAUDE START ===" && \
-  timeout 300s stdbuf -o0 -e0 claude -p --bare --dangerously-skip-permissions --output-format text --verbose --debug < /prompts/${trialId}.task.txt 2>&1 || echo "=== CLAUDE TIMED OUT OR CRASHED (exit code $? ) ===" && \
+  timeout ${trialTimeoutS}s stdbuf -o0 -e0 claude -p --bare --model ${agentModel} --dangerously-skip-permissions --output-format text --verbose --debug < /prompts/${trialId}.task.txt 2>&1 || echo "=== CLAUDE TIMED OUT OR CRASHED (exit code $? ) ===" && \
   echo "=== CLAUDE FINISHED ==="`;
 
   const startTime = new Date();
@@ -221,12 +292,26 @@ export async function runWeaveEval(
     workspaceMount: workspaceDir,
     promptMount: promptDir,
     apiKey,
+    // Container hard-stop trails the in-container `timeout` so the trial
+    // timeout stays the single knob (buffer covers container start + echo).
+    timeoutMs: (trialTimeoutS + 120) * 1000,
   });
   const durationMs = new Date().getTime() - startTime.getTime();
 
-  const gitDiff = await captureGitDiff(workspaceDir);
+  const gitDiff = await captureGitDiff(workspaceDir, initialCommit);
   const testOutput = await captureTestOutput(workspaceDir);
   const { concatenated: weaveArtifacts, capsuleCount } = await collectWeaveArtifacts(workspaceDir);
+
+  // Judge-free metric layer (zero API cost), computed before any LLM judging.
+  // Scope comes from the SOURCE fixture dir (its _oracle/ was stripped from
+  // the workspace above). See deterministic.ts for honesty bounds.
+  const deterministic = await computeDeterministicMetrics({
+    transcript,
+    gitDiff,
+    testOutput,
+    workspaceDir,
+    scope: await loadFixtureScope(fixtureDir),
+  });
 
   // Reuse the base 7-dimension blind judge (variant withheld).
   const baseTrial: TrialResult = {
@@ -246,7 +331,7 @@ export async function runWeaveEval(
     },
     notes: '',
   };
-  const scored = await scoreTrial(baseTrial, fullCharter);
+  const scored = await scoreTrial(baseTrial, coreCharter);
 
   // Weave-specific judge (given ground truth).
   const weaveScore = await scoreWeaveTrial({
@@ -262,7 +347,9 @@ export async function runWeaveEval(
   const weave_specific = { ...emptyWeaveMetrics(), ...weaveScore.metrics };
   weave_specific.capsules_produced = capsuleCount;
 
-  const result: WeaveTrialResult = {
+  // `deterministic` rides along in the JSONL line and the runDir evidence JSON
+  // without touching weave-types.ts (owned by the weave-restructure stage).
+  const result: WeaveTrialResult & { deterministic: DeterministicMetrics } = {
     timestamp: new Date().toISOString(),
     fixture: fixtureName,
     mode,
@@ -271,6 +358,7 @@ export async function runWeaveEval(
     exitCode,
     scores: scored.scores,
     weave_specific,
+    deterministic,
     notes: `base: ${scored.notes} | weave: ${weaveScore.rationale}`,
   };
 

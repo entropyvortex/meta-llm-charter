@@ -1,0 +1,136 @@
+# Charter lint gates — three deterministic checks, git-only, no deps:
+#
+#   (a) byte budget   — CLAUDE.md (the always-loaded core) must stay <= 2400 B.
+#                       Target is 2,048 B; the gate carries ~17% slack because
+#                       bytes are a token proxy (~4 B/token). See TOKEN-BUDGET.md.
+#   (b) changelog     — any diff that changes CLAUDE.md must also change
+#                       CHANGELOG.md, so core-behavior edits are always recorded.
+#   (c) single-source — exactly one charter copy may exist in the tree. Two
+#                       layers: a load-path gate on files *named* CLAUDE.md
+#                       (Claude Code auto-loads every one on the directory
+#                       path — a second copy recreates the v2 double-load/skew
+#                       hazard), plus a grep tripwire for the charter H1 title
+#                       marker pasted into files under other names.
+
+name: Charter Lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  charter-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: check (b) diffs against the base ref, which on push
+          # events can be any ancestor commit.
+          fetch-depth: 0
+
+      - name: "(a) Core byte budget: wc -c CLAUDE.md <= 2400"
+        run: |
+          # DECISIONS: target 2,048 B; CI hard-fails above 2,400 B. Uses
+          # `wc -c <` so the output is the bare byte count, filename-free.
+          size=$(wc -c < CLAUDE.md)
+          echo "CLAUDE.md is ${size} bytes (budget: 2400)"
+          if [ "$size" -gt 2400 ]; then
+            echo "::error file=CLAUDE.md::core charter is ${size} B — exceeds the 2,400 B always-loaded budget (target 2,048 B; see TOKEN-BUDGET.md)"
+            exit 1
+          fi
+
+      - name: "(b) CLAUDE.md changes require a CHANGELOG.md entry"
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          # Pick the base ref: the PR base for pull_request events, the
+          # pre-push sha for push events. Three-dot diff (merge-base..HEAD)
+          # so files changed only on the base branch are never counted.
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            base="$PR_BASE_SHA"
+          else
+            base="$PUSH_BEFORE"
+          fi
+          # New-branch pushes report the all-zero sha, and force-pushes can
+          # reference a sha no longer reachable. Skip with a notice in those
+          # cases — the pull_request run of this same gate still blocks the
+          # change before merge, so nothing lands unrecorded.
+          if [ -z "$base" ] \
+             || [ "$base" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$base" 2>/dev/null; then
+            echo "::notice::no resolvable base for this ${EVENT_NAME} event — skipping changelog gate (PR run enforces it)"
+            exit 0
+          fi
+          changed=$(git diff --name-only "$base"...HEAD)
+          echo "files changed vs ${base}:"
+          echo "$changed"
+          if echo "$changed" | grep -qx 'CLAUDE.md' \
+             && ! echo "$changed" | grep -qx 'CHANGELOG.md'; then
+            echo "::error file=CHANGELOG.md::CLAUDE.md changed without a CHANGELOG.md entry in the same diff — record the change (see CHANGELOG.md preamble for semver rules)"
+            exit 1
+          fi
+          echo "changelog gate OK"
+
+      - name: "(c) Single-source gate: exactly one charter copy"
+        run: |
+          # --- (c1) Load-path gate (authoritative) -------------------------
+          # Claude Code loads every CLAUDE.md from cwd upward, so any second
+          # tracked file *named* CLAUDE.md double-loads a charter variant.
+          # Exactly one is allowed: the repo-root core.
+          copies=$(git ls-files | awk -F/ '$NF == "CLAUDE.md"')
+          count=$(printf '%s\n' "$copies" | grep -c . || true)
+          echo "tracked CLAUDE.md files (${count}):"
+          printf '%s\n' "$copies"
+          if [ "$count" -ne 1 ]; then
+            echo "::error::expected exactly 1 tracked CLAUDE.md, found ${count} — nested copies recreate the v2 double-load; use the @-import pointer (MIGRATION.md)"
+            exit 1
+          fi
+
+          # --- (c2) Copy-paste tripwire (heuristic) ------------------------
+          # No other tracked file may carry the charter H1 title marker
+          # '# META v<digit>' at line start. Anchoring to '^# ' plus a digit
+          # keeps prose mentions out: '## META v2.0 ...' subheadings and
+          # inline quotes contain the substring '# META v' but are not a
+          # charter title. Named exclusions, each with a reason:
+          #   CHANGELOG.md / MIGRATION.md / TOKEN-BUDGET.md
+          #       — version-history and migration docs quote old titles;
+          #   README.md
+          #       — the repo landing page titles itself after the charter
+          #         but is never auto-loaded by any harness;
+          #   GROK-META.md
+          #       — generated single-file Grok export; its paste block
+          #         intentionally embeds charter headings verbatim;
+          #   docs/**
+          #       — human-facing long-form archive, never auto-loaded;
+          #   evals/**
+          #       — fixtures and tests embed charter text as test data.
+          # Any OTHER file matching means a charter copy was pasted somewhere
+          # a doc doesn't belong — fail. (git grep exits 1 on zero matches,
+          # hence the `|| true`.)
+          matches=$(git grep -lE '^# META v[0-9]' -- \
+            ':(exclude)CHANGELOG.md' \
+            ':(exclude)MIGRATION.md' \
+            ':(exclude)TOKEN-BUDGET.md' \
+            ':(exclude)README.md' \
+            ':(exclude)GROK-META.md' \
+            ':(exclude)docs/**' \
+            ':(exclude)evals/**' \
+            || true)
+          echo "files carrying the charter title marker (after exclusions):"
+          printf '%s\n' "${matches:-<none>}"
+          extra=$(printf '%s\n' "$matches" | grep -vx 'CLAUDE.md' | grep -c . || true)
+          if [ "$extra" -ne 0 ]; then
+            echo "::error::charter title marker '# META v' found outside CLAUDE.md — the charter is single-source; link or @-import it instead of copying"
+            exit 1
+          fi
+          echo "single-source gate OK"

@@ -2,20 +2,35 @@
 #
 # This workflow is deliberately NOT bound to pull_request or push. Each run
 # burns paid API quota (Anthropic, both for the trial agent and the judge).
-# A full run is roughly $5–$15. A 10-trial smoke is $2–$5.
+# A full run is roughly $5–$15. An 18-trial smoke is $2–$5.
 #
 # To run: go to Actions → "Run META charter evals" → Run workflow.
 # Required repo secrets: ANTHROPIC_API_KEY.
+#
+# Reproducibility contract: AGENT_MODEL is mandatory (the harness aborts
+# without it — an unpinned agent model confounds cross-run comparisons), and
+# every run writes runs/<id>/manifest.json (models, timeout, fixtures,
+# charter SHA-256, harness git SHA) which is uploaded with the artifacts.
 
 name: Run META charter evals
 
 on:
   workflow_dispatch:
     inputs:
+      agent_model:
+        description: 'Pinned trial agent model (passed as claude --model). Mandatory — the harness refuses to run without it.'
+        required: true
+        default: 'claude-sonnet-4-6'
+        type: string
       trials_per_pair:
-        description: 'Trials per (fixture × variant) pair. Default 1 = smoke (10 trials total).'
+        description: 'Trials per (fixture × variant) pair. Default 1 = smoke (18 trials total: 9 fixtures × 2 arms).'
         required: true
         default: '1'
+        type: string
+      trial_timeout_s:
+        description: 'Per-trial agent timeout in seconds (TRIAL_TIMEOUT_S).'
+        required: true
+        default: '600'
         type: string
       fixture_filter:
         description: 'Optional fixture name filter (substring). Leave empty for all.'
@@ -47,18 +62,36 @@ jobs:
         working-directory: ./evals
         run: npm run build
 
+      # docker.ts passes `--env-file .env` (cwd = evals/). The real .env is
+      # gitignored, so a fresh checkout has none and every `docker run` would
+      # fail before the container starts — silently, into judged CSV rows.
+      # Secrets are injected via explicit -e flags; an empty file satisfies
+      # docker. Trial-workspace git commits use inline (-c) identity, so no
+      # global git config step is needed here.
+      - name: Provide empty .env for docker --env-file
+        working-directory: ./evals
+        run: '[ -f .env ] || touch .env'
+
       - name: Run evals
         working-directory: ./evals
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENT_MODEL: ${{ inputs.agent_model }}
+          TRIAL_TIMEOUT_S: ${{ inputs.trial_timeout_s }}
           TRIALS_PER_PAIR: ${{ inputs.trials_per_pair }}
           FIXTURE: ${{ inputs.fixture_filter }}
         run: npm start
 
-      - name: Upload run artifacts
+      # Upload manifest + results + transcripts + prompts, but not the trial
+      # workspace: it only holds the LAST trial's mutated fixture snapshot and
+      # can be bloated by node_modules created during test capture.
+      - name: Upload run artifacts (manifest, results, transcripts)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eval-run-${{ github.run_id }}
-          path: evals/runs/
+          path: |
+            evals/runs/
+            !evals/runs/**/workspace/**
           retention-days: 30
+          if-no-files-found: warn

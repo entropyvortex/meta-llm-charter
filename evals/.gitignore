@@ -1,5 +1,11 @@
 node_modules/
 dist/
 .env
+# Raw runs (workspaces, prompts, unsanitized transcripts) never enter git.
 runs/
+# Raw JSONL the weave runner appends directly into results/ stays local until
+# curated. Curated run dirs (results/<runId>/, written by `npm run
+# publish-run -- <runId>`) are committed by default.
 results/*.jsonl
+!results/*/
+!results/README.md
