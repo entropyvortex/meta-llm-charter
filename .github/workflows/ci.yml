@@ -1,0 +1,60 @@
+# Free CI: no API key, no Docker. Two independent gates:
+#
+#   build    — the eval harness must typecheck (npm install + tsc).
+#   fixtures — every evals/fixtures/*/ and evals/weave-fixtures/*/ dir with a
+#              test/ directory is discovered DYNAMICALLY and its suite run via
+#              `npx --yes tsx --test test/*.spec.ts`. Fixtures ship
+#              designed-failing tests at HEAD (they are eval traps), so the
+#              gate is NOT exit 0: the runner must produce a node:test summary,
+#              and pinned pass/fail/cancelled counts must match
+#              evals/fixtures-expected.json exactly. New, not-yet-pinned
+#              fixtures get the summary assertion only.
+#              Regenerate pins with: cd evals && npm run fixtures:expected
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install evals deps
+        working-directory: ./evals
+        run: npm install
+
+      - name: Build harness (tsc)
+        working-directory: ./evals
+        run: npm run build
+
+  fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The checker script is dependency-free (node builtins only); fixture
+      # suites pull tsx on demand via `npx --yes`. No npm install needed.
+      - name: Run fixture suites and compare against pinned counts
+        working-directory: ./evals
+        run: npm run fixtures:check

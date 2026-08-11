@@ -9,6 +9,17 @@ dist/
 evals/runs/
 runs/
 
+# Weave: live session state and ephemeral local result lines. evals/results/ is
+# the committed publish location (see CONTRIBUTING.md), but raw generated JSONL
+# is ephemeral by default — publish a curated run with `git add -f`.
+# Anchored to repo root so fixture seeds (evals/weave-fixtures/*/.planning/) and
+# in-sandbox state (evals/runs/.../.planning/, already ignored) stay committable.
+/.planning/
+evals/results/*.jsonl
+
+# Editor backups (e.g. nano *.save)
+*.save
+
 # Environment
 .env
 .env.local

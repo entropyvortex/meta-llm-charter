@@ -1,8 +1,23 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { TrialResult } from './types.js';
 
-const client = new Anthropic();
-const JUDGE_MODEL = process.env.JUDGE_MODEL ?? 'claude-sonnet-4-6';
+/**
+ * ABSOLUTE per-trial 7-dimension judge. Kept as per-trial detail/diagnostics;
+ * the HEADLINE charter-vs-baseline comparison is the pairwise forced-choice
+ * scorer (pairwise-scorer.ts), which is deterministically gated, sanitized
+ * (sanitize.ts), and analyzed with sign tests. This judge's epistemic score
+ * is superseded downstream by the deterministic R8 metrics (DECISIONS.md #3).
+ */
+
+// Lazy: constructing the SDK client throws without ANTHROPIC_API_KEY, and this
+// module is imported by test/analysis paths that never call the judge.
+let client: Anthropic | null = null;
+function getClient(): Anthropic {
+  return (client ??= new Anthropic());
+}
+
+/** Single source of truth for the judge model (index.ts / weave-runner / pairwise import it). */
+export const JUDGE_MODEL = process.env.JUDGE_MODEL ?? 'claude-sonnet-4-6';
 
 const TRANSCRIPT_LIMIT = 50_000;
 const DIFF_LIMIT = 20_000;
@@ -87,7 +102,7 @@ const SCORE_TOOL: Anthropic.Tool = {
   },
 };
 
-function truncate(s: string, max: number): string {
+export function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
   const head = s.slice(0, Math.floor(max * 0.7));
   const tail = s.slice(-Math.floor(max * 0.2));
@@ -106,6 +121,11 @@ interface ScorePayload {
 }
 
 export async function scoreTrial(result: TrialResult, charter: string): Promise<TrialResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    result.notes = 'JUDGE_SKIPPED: no ANTHROPIC_API_KEY (experimental subscription mode for agent only)';
+    return result;
+  }
+
   // Variant is intentionally NOT included in the judge's input.
   const trialMaterials = `
 <task-name>${result.taskName}</task-name>
@@ -126,7 +146,7 @@ ${truncate(result.testOutput, TEST_LIMIT)}
 `;
 
   try {
-    const response = await client.messages.create({
+    const response = await getClient().messages.create({
       model: JUDGE_MODEL,
       max_tokens: 1500,
       // Cache the charter + rubric — stable across all trials in a run.

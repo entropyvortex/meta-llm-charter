@@ -1,7 +1,7 @@
 {
   "name": "meta-charter-evals",
   "version": "1.0.0",
-  "description": "A/B evals for META v1.3 charter vs no-charter baseline (Docker sandboxed)",
+  "description": "Eval harness for the META v3 core charter: charter-vs-baseline A/B trials (Docker sandboxed) plus additive skill-arm evals (skill-present vs skill-absent)",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,13 @@
     "start": "node dist/index.js",
     "dev": "node --loader ts-node/esm src/index.ts",
     "smoke": "TRIALS_PER_PAIR=1 node dist/index.js",
-    "single": "TRIALS_PER_PAIR=1 node dist/index.js"
+    "test:harness": "tsc && node --test dist/*.test.js",
+    "single": "TRIALS_PER_PAIR=1 node dist/index.js",
+    "publish-run": "node dist/publish-run.js",
+    "weave:eval": "node dist/weave-runner.js",
+    "fixtures:expected": "node scripts/fixtures-expected.mjs --write",
+    "fixtures:check": "node scripts/fixtures-expected.mjs --check",
+    "weave:smoke": "npm run build && npm run weave:eval -- knowledge-propagation-auth-rate-limit weave && npm run weave:eval -- knowledge-propagation-auth-rate-limit baseline && npm run weave:eval -- judgment-consensus-partial-success weave && npm run weave:eval -- judgment-consensus-partial-success baseline"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",

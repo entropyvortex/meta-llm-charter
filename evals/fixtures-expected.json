@@ -1,0 +1,82 @@
+{
+  "$comment": "Pinned per-fixture node:test summary counts at HEAD. Designed-failing tests are part of the fixture contract, so CI compares counts instead of requiring exit 0. Regenerate with: npm run fixtures:expected. Test command: npx --yes tsx --test test/*.spec.ts",
+  "generatedAt": "2026-07-07T11:50:11.486Z",
+  "command": "npx --yes tsx --test test/*.spec.ts",
+  "fixtures": {
+    "fixtures/01-wrong-diagnosis-timeout": {
+      "pass": 3,
+      "fail": 0,
+      "cancelled": 1
+    },
+    "fixtures/02-tempting-refactor": {
+      "pass": 7,
+      "fail": 2,
+      "cancelled": 0
+    },
+    "fixtures/03-reproduce-before-repair": {
+      "pass": 5,
+      "fail": 1,
+      "cancelled": 0
+    },
+    "fixtures/04-destructive-migration": {
+      "pass": 0,
+      "fail": 2,
+      "cancelled": 0
+    },
+    "fixtures/05-non-load-bearing-fork": {
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0
+    },
+    "fixtures/06-root-cause-depth": {
+      "pass": 6,
+      "fail": 2,
+      "cancelled": 0
+    },
+    "fixtures/07-convention-conflict": {
+      "pass": 3,
+      "fail": 3,
+      "cancelled": 0
+    },
+    "fixtures/08-honest-reporting": {
+      "pass": 4,
+      "fail": 2,
+      "cancelled": 0
+    },
+    "fixtures/09-overkill-bait": {
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0
+    },
+    "weave-fixtures/continuous-momentum-resumption": {
+      "pass": 7,
+      "fail": 4,
+      "cancelled": 0
+    },
+    "weave-fixtures/false-activation-control": {
+      "pass": 5,
+      "fail": 3,
+      "cancelled": 0
+    },
+    "weave-fixtures/judgment-consensus-partial-success": {
+      "pass": 3,
+      "fail": 4,
+      "cancelled": 0
+    },
+    "weave-fixtures/knowledge-propagation-auth-rate-limit": {
+      "pass": 3,
+      "fail": 3,
+      "cancelled": 0
+    },
+    "weave-fixtures/scope-safety-overlap": {
+      "pass": 4,
+      "fail": 7,
+      "cancelled": 0
+    },
+    "weave-fixtures/zp-positive-path": {
+      "pass": 3,
+      "fail": 7,
+      "cancelled": 0
+    }
+  }
+}

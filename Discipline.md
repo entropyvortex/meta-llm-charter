@@ -1,5 +1,14 @@
 # META DISCIPLINE CHARTER v1.0
 
+> **STATUS: NON-NORMATIVE — ASPIRATIONAL / HISTORICAL (demoted in META v3.0).**
+> This document is retained for history only and binds no agent, contributor,
+> or CI process. It is **subordinate to [`CLAUDE.md`](CLAUDE.md)**, the META
+> v3.0 core charter and this repo's single normative source of truth; where
+> the two conflict, CLAUDE.md wins. In particular, rule 11's former claim that
+> this charter is "the highest-priority context" is **void** — rule 11 below
+> has been edited to remove that precedence claim. The rest of the text is
+> preserved as-is for the historical record.
+
 This document elevates LLM coding agents (Claude, Grok, Cursor, etc.) and human teams to **ASI-level optimization**: deterministic quality gates, security-by-design, consensus-driven persona validation, persistent organizational knowledge, and self-propagating rigor. It is the substrate for all future projects.
 
 ---
@@ -101,7 +110,7 @@ This document elevates LLM coding agents (Claude, Grok, Cursor, etc.) and human 
     - Never commit code that has not passed sandbox + consensus + eval
     - Use memory retrieval before answering architecture or rule questions
     - Flag any deviation from Discipline.md immediately
-    - The Meta-Rule: This charter is the highest-priority context. Update it when ecosystem patterns evolve.
+    - The Meta-Rule: Update this charter when ecosystem patterns evolve. *(A former precedence claim was removed in META v3.0 — see the status banner; `CLAUDE.md` is the normative charter.)*
 
 12. **The Ultimate Meta-Rule**  
     This `Discipline.md` is self-referential and evolves. Every project contributes observed best practices back here via consensus. The goal is not static perfection but **continuously compounding rigor** — the true path to ASI engineering discipline.
@@ -138,7 +147,9 @@ This document elevates LLM coding agents (Claude, Grok, Cursor, etc.) and human 
 1. Add this file to every existing repo (PR with consensus sign-off).
 2. Update bootstrap templates (buckle, create-repository scripts).
 3. Add CI enforcer workflow.
-4. Reference in all `CLAUDE.md` / `GROK-META.md` as highest context.
+4. Reference in `CLAUDE.md` / `GROK-META.md` as subordinate, non-normative
+   background (the META v3.0 core charter in `CLAUDE.md` remains the single
+   normative source of truth).
 5. Share publicly — this is the gift to the community.
 
 **This is not a document. This is the operating system for frontier disciplined engineering.**
