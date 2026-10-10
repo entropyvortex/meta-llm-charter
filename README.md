@@ -1,5 +1,13 @@
 # META v3.1 — LLM Agent Engineering Charter
 
+Stops coding agents from guessing, skipping verification and taking irreversible actions without a gate.
+
+[![CI](https://github.com/entropyvortex/meta-llm-charter/actions/workflows/ci.yml/badge.svg)](https://github.com/entropyvortex/meta-llm-charter/actions/workflows/ci.yml) [![Charter Lint](https://github.com/entropyvortex/meta-llm-charter/actions/workflows/lint.yml/badge.svg)](https://github.com/entropyvortex/meta-llm-charter/actions/workflows/lint.yml)
+
+Used in real Vortex Serviços and SabIA production work: every coding agent session on those systems runs under this charter.
+
+Tests and CI: the eval harness typechecks and the core charter size gate runs on every push and pull request.
+
 **A 2,399-byte always-loaded core. Three explicit-invocation skills. Deterministic gates where prose used to be.**
 
 A compact, operational constitution that turns frontier coding agents (Claude Code, Cursor, etc.) from eager-junior behavior into disciplined principal-engineer execution.
